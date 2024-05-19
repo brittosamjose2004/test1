@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #2A2A2A;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2, .sidebar h1, .sidebar label {
+            color: #FF4747;
+        }
+
+        .sidebar form {
+            margin-top: 20px;
+        }
+
+        .sidebar .form-group {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .form-control {
+            background-color: #121212;
+            color: white;
+            border: 1px solid #444;
+            width: 100%;
+        }
+
+        .sidebar .btn-primary {
+            background-color: #FF4747;
+            border: none;
+            width: 100%;
+        }
+
+        .sidebar .chart-container {
+            margin-top: 20px;
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .sidebar canvas {
+            width: 100% !important;
+            height: 300px; /* Set a fixed height for the chart */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header h1 {
+            color: #FF4747;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .chart {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: calc(50% - 10px); /* Adjusted to fit two charts in a row */
+            height: 300px; /* Reduced height */
+        }
+
+        .live-data {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            height: 300px; /* Reduced height */
+            margin-bottom: 20px;
+        }
+
+        .statistics {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .statistics h3 {
+            color: #FF4747;
+            margin: 10px 0;
+        }
+
+        .statistics p {
+            color: #FF4747;
+        }
+
+        .forecast {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .forecast h2 {
+            color: #FF4747;
+        }
+
+        .forecast img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .forecast ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .forecast ul li {
+            margin: 5px 0;
+        }
+
+        canvas {
+            height: 100% !important; /* Ensures the canvas elements take the full height of their container */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Dashboard</h2>
+            <h1 class="mt-4">Crime Prediction for 2025 and 2026</h1>
+
+            <!-- Form to select a year for prediction -->
+            <form method="post" class="mb-4">
+                <div class="form-group">
+                    <label for="year">Select Year to Predict:</label>
+                    <select name="year" id="year" class="form-control w-25">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Show Predictions</button>
+            </form>
+
+            <!-- New chart added below the form -->
+            <div class="chart-container">
+                <canvas id="newChart"></canvas>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>Analysis</h1>
+            </div>
+            <div class="content">
+                <div class="chart">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="crimeRateChart"></canvas>
+                </div>
+                
+                <div class="forecast">
+                    <!-- Display the Plotly graph if available -->
+                    {% if graph %}
+                        <h2>Predicted Crimes</h2>
+                        <div>
+                            {{ graph|safe }}  <!-- The Plotly graph rendered as HTML -->
+                        </div>
+                    {% endif %}
+
+                    <!-- Display error messages if there's an error -->
+                    {% if error %}
+                        <div class="alert alert-danger mt-4">
+                            <strong>Error:</strong> {{ error }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="chart">
+                    <canvas id="waterfallChart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div class="live-data">
+                    <canvas id="liveDataChart"></canvas>
+                </div>
+                <div class="statistics">
+                    <h3>Crime Statistics</h3>
+                    <p>Early hours 3am-9am the crime rates are low</p>
+                    <p>After 9am-12pm the crime rate are low but starts increasing</p>
+                    <p>After 12pm the crime rates will be moderate but keeps on increasing</p>
+                    <p>After 6pm the crime rates are high</p>
+                    <p>Drug abuse and trafficking remain significant issues mainly the increasing of drugs and drug peddlers are high in Bangalore due to extensive networks​</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ["2016","2017","2018","2019","2020","2021","2022","2023","2024"],
+                    datasets: [{
+                        label: 'Crime Analysis 2016-2024',
+                        data: [230.4000,250.12000,222.12000,177.36000,162.29000,177.818000,179.97000,233.781000,42.72000],
+                        backgroundColor: [
+                            '#00BFFF', '#7CFC00', '#FF69B4', '#FF4500', '#FFD700', '#ADFF2F', '#00FFFF', '#BA55D3', '#32CD32', '#FF6347'
+                        ],
+                        borderColor: [
+                            '#00BFFF', '#7CFC00', '#FF69B4', '#FF4500', '#FFD700', '#ADFF2F', '#00FFFF', '#BA55D3', '#32CD32', '#FF6347'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Crime Rate Pie Chart
+            const crimeRateCtx = document.getElementById('crimeRateChart').getContext('2d');
+            new Chart(crimeRateCtx, {
+                type: 'pie',
+                data: {
+                    labels: ["Motor Vehicle Accident Non-Fatal","Theft","CrPc","Cases of Hurt","Missing Person"],
+                    datasets: [{
+                        label: 'Top 5 Crime in Karnataka',
+                        data: [20.3,13.3,11.5,10.5,10.4],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 99, 132, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Live Data Chart
+            const liveDataCtx = document.getElementById('liveDataChart').getContext('2d');
+            new Chart(liveDataCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00','12:00',"13:00",'14:00',"15:00",'16:00','17:00','18:00',"19:00",'20:00','21:00','22:00','23:00'],
+                    datasets: [{
+                        label: 'Crime Occuring Probability in a Day',
+                        data: [86, 87, 90, 55, 45, 24, 17, 6.6, 6, 8, 9, 10, 14, 18, 20,25,30,35,55,62,70,78,82,84],
+                        backgroundColor: 'rgba(255, 71, 71, 0.2)',
+                        borderColor: 'rgba(255, 71, 71, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Waterfall Chart
+            const waterfallCtx = document.getElementById('waterfallChart').getContext('2d');
+            new Chart(waterfallCtx, {
+                type: 'bar',
+                data: {
+                    labels: ["Bengaluru City","Bengaluru Dist","Tumakuru","Shivamogga","Mandya"],
+                    datasets: [{
+                        label: 'Top 5 Most Occured Districts',
+                        data: [430754,65032,62520,62047,60219],
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            display: true,
+                            color: 'black',
+                            align: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Radar Chart
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Cyber Crime', 'Violent Crime', 'Sexual Harassment', 'Rape', 'Kidnapping', 'Property', 'Fraud'],
+                    datasets: [{
+                        label: 'Crime Rate Radar',
+                        data: [2300, 1000, 1000, 624, 500, 431, 430],
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // New Chart
+            const newChartCtx = document.getElementById('newChart').getContext('2d');
+            new Chart(newChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Male','Female','Enuch'],
+                    datasets: [{
+                        label: 'Sex',
+                        data: [995123,469964,4690],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #2A2A2A;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2, .sidebar h1, .sidebar label {
+            color: #EFF204;
+        }
+
+        .sidebar .btn-back {
+            background-color: #FF4747;
+            border: none;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .sidebar nav a {
+            display: block;
+            color: white;
+            padding: 10px 0;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .sidebar nav a:hover {
+            background-color: #444;
+        }
+
+        .sidebar nav .sub-menu {
+            display: none;
+            padding-left: 20px;
+        }
+
+        .sidebar nav .sub-menu a {
+            padding: 5px 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 0;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <button class="btn-back" onclick="goBack()">Back</button>
+            <h2>Dashboard</h2>
+            <nav>
+                <a href="heatmap.html">Heat Map</a>
+                <a onclick="toggleSubMenu(event)">Prediction</a>
+                <div class="sub-menu">
+                    <a href="crime_suggestions.html">Crime Suggestion Prediction</a>
+                    <a href="behavioral_prediction.html">Behavior Prediction</a>
+                    <a href="future_crime_prediction.html">Future Crime Prediction</a>
+                </div>
+            </nav>
+            
+            <div class="chart-container">
+                <canvas id="karnatakaMapChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="crimeTrendChart"></canvas>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="iframe-container">
+                <iframe src="https://heat-map1.netlify.app"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function toggleSubMenu(event) {
+            event.preventDefault();
+            const subMenu = event.target.nextElementSibling;
+            subMenu.style.display = subMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM content loaded");
+
+            
+
+            // Karnataka Map Chart
+            const karnatakaMapCtx = document.getElementById('karnatakaMapChart').getContext('2d');
+            new Chart(karnatakaMapCtx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Crime Rates in Karnataka',
+                        data: [
+                            { x: 12.9716, y: 77.5946, r: 15 }, // Bengaluru
+                            { x: 12.2958, y: 76.6394, r: 10 }, // Mysuru
+                            { x: 12.9141, y: 74.8560, r: 12 }, // Mangaluru
+                            { x: 15.3647, y: 75.1240, r: 8 }, // Hubli
+                            { x: 15.8497, y: 74.4977, r: 5 }  // Belagavi
+                        ],
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Latitude'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Longitude'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Crime Trend Chart
+            const crimeTrendCtx = document.getElementById('crimeTrendChart').getContext('2d');
+            new Chart(crimeTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2019', '2020', '2021', '2022', '2023'],
+                    datasets: [{
+                        label: 'Crime Trends Over the Years',
+                        data: [120, 150, 180, 130, 170],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Crimes'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

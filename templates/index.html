@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Prediction</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        .container {
+            position: relative;
+            height: 100%;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left img {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .nav-right ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-right ul li {
+            position: relative;
+            margin-left: 20px;
+        }
+
+        .nav-right ul li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 30px;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #fff;
+            border-radius: 5px;
+            z-index: 1001;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .dropdown a:hover {
+            background-color: #333;
+        }
+
+        .hero {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: url('crime.avif') no-repeat center center/cover;
+        }
+
+        .hero-text {
+            position: relative;
+            color: #ff0000;
+            z-index: 1001;
+        }
+
+        .hero-text img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .hero-text h1 {
+            font-size: 6vw;
+            margin: 0;
+        }
+
+        .hero-text h3 {
+            font-size: 3vw;
+            margin: 10px 0;
+        }
+
+        .hero-text p {
+            font-size: 2vw;
+        }
+
+        @media (max-width: 768px) {
+            .nav-right ul {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-right ul li {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .dropdown {
+                position: static;
+            }
+
+            .hero-text h1 {
+                font-size: 8vw;
+            }
+
+            .hero-text h3 {
+                font-size: 4vw;
+            }
+
+            .hero-text p {
+                font-size: 3vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="nav-left">
+                <img src="Seal_of_Karnataka.png" alt="Logo">
+            </div>
+            <div class="nav-right">
+                <ul>
+                    <li>
+                        <a href="#" class="toggle-dropdown">Prediction</a>
+                        <div class="dropdown">
+                            <a href="behavior.html">Behavior Prediction</a>
+                            <a href="crime_prediction.html">Crime Prediction</a>
+                            <a href="future_crime.html">Future Crime Prediction</a>
+                            <a href="cluster.html">Crime Solution</a>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#" class="toggle-dropdown">Hotspot</a>
+                        <div class="dropdown">
+                            <a href="heat-map.html">Heat-map</a>
+                            <a href="crime-marker.html">Crime-marker</a>
+                        </div>
+                    </li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="hero">
+            <div class="hero-text">
+                <img src="Seal_of_Karnataka.png" alt="Center Logo">
+                <h1>CRIME PREDICTION</h1>
+                <h3>USING MACHINE LEARNING</h3>
+                <p>A Systematic Review and Future Directions</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownToggles = document.querySelectorAll('.toggle-dropdown');
+            
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const dropdown = this.nextElementSibling;
+                    const isOpen = dropdown.style.display === 'block';
+                    document.querySelectorAll('.dropdown').forEach(drop => drop.style.display = 'none');
+                    dropdown.style.display = isOpen ? 'none' : 'block';
+                });
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.nav-right ul li')) {
+                    document.querySelectorAll('.dropdown').forEach(drop => drop.style.display = 'none');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

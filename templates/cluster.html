@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #2A2A2A;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2, .sidebar h1, .sidebar label {
+            color: #C70B94;
+        }
+
+        .sidebar form {
+            margin-top: 20px;
+        }
+
+        .sidebar .form-group {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .form-control {
+            background-color: #121212;
+            color: white;
+            border: 1px solid #444;
+            width: 100%;
+        }
+
+        .sidebar .btn-primary {
+            background-color: #C70B94;
+            border: none;
+            width: 100%;
+        }
+
+        .sidebar .btn-back {
+            background-color: #C70B94;
+            border: none;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .chart-container {
+            margin-top: 20px;
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .sidebar canvas {
+            width: 100% !important;
+            height: 300px; /* Set a fixed height for the chart */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header h1 {
+            color: #C70B94;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .chart {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: calc(50% - 10px); /* Adjusted to fit two charts in a row */
+            height: 300px; /* Reduced height */
+        }
+
+        .live-data {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            height: 300px; /* Reduced height */
+            margin-bottom: 20px;
+        }
+
+        .statistics {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .statistics h3 {
+            color: #FF4747;
+            margin: 10px 0;
+        }
+
+        .statistics p {
+            color: #FF4747;
+        }
+
+        .forecast {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .forecast h2 {
+            color: #FF4747;
+        }
+
+        .forecast img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .forecast ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .forecast ul li {
+            margin: 5px 0;
+        }
+
+        canvas {
+            height: 100% !important; /* Ensures the canvas elements take the full height of their container */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <button class="btn-back" onclick="goBack()">Back</button>
+            <h2>Dashboard</h2>
+            <h1 class="my-4">Find Closest Cluster by Coordinates</h1>
+        
+        <!-- Form to find the closest cluster -->
+        <form id="queryForm" class="form-inline">
+            <div class="form-group mx-2">
+                <label for="latitude" class="sr-only">Latitude</label>
+                <input type="text" id="latitude" placeholder="Latitude" class="form-control" required>
+            </div>
+            
+            <div class="form-group mx-2">
+                <label for="longitude" class="sr-only">Longitude</label>
+                <input type="text" id="longitude" placeholder="Longitude" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary mx-2">Find Cluster</button>
+        </form>
+
+            <!-- New chart added below the form -->
+            <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>Analysis</h1>
+            </div>
+            <div class="content">
+                <div class="chart">
+                    <!-- Inserted iframe in place of the original chart -->
+                    <iframe src="C:\Users\hp\Downloads\model\chart\Tumakuru.html" style="width:100%; height:100%; border:none;"></iframe>
+                </div>
+                <!-- Removed the original 'newChart' canvas element -->
+                <div class="chart">
+                    <!-- Inserted iframe in place of the original chart -->
+                    <iframe src="C:\Users\hp\Downloads\model\chart\Bagalkot.html" style="width:100%; height:100%; border:none;"></iframe>
+                </div>
+                
+                <div class="forecast">
+                    <!-- Result section to display the response -->
+      <center> <div id="result" class="chart">
+            <!-- The results will be displayed here -->
+        </div> </center>
+    </div>
+
+    <!-- JavaScript to handle form submission and AJAX -->
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting in the traditional way
+
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
+
+            fetch(/get-closest-cluster?latitude=${latitude}&longitude=${longitude})
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('result');
+
+                    if (data.closest_cluster) {
+                        resultDiv.innerHTML = `
+                            <div class="highlight">
+                                <h2>Closest Cluster: ${data.closest_cluster}</h2>
+                                <p>Centroid: Latitude ${data.cluster_centroid.Latitude}, Longitude ${data.cluster_centroid.Longitude}</p>
+                                <p><strong>Number of Incidents:</strong> ${data.number_of_incidents}</p>
+                                <p><strong>Suggestions:</strong> ${data.suggestions}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = <p>Error fetching closest cluster data.</p>;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = <p>Unable to retrieve data.</p>;
+                });
+        });
+    </script>
+                </div>
+                
+                
+               <center>
+                <div class="chart">
+                    <!-- Inserted iframe in place of the original chart -->
+                    <iframe src="C:\Users\hp\Downloads\model\chart\Bengaluru%20district.html" style="width:100%; height:100%; border:none;"></iframe>
+                </div> </center>
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script>
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+           // Radar Chart
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Cyber Crime', 'Violent Crime', 'Sexual Harassment', 'Rape', 'Kidnapping', 'Property', 'Fraud'],
+                    datasets: [{
+                        label: 'Crime Rate Radar',
+                        data: [2300, 1000, 1000, 624, 500, 431, 430],
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

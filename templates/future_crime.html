@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #2A2A2A;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2, .sidebar h1, .sidebar label {
+            color: #1E90FF; /* Changed color */
+        }
+
+        .sidebar form {
+            margin-top: 20px;
+        }
+
+        .sidebar .form-group {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .form-control {
+            background-color: #121212;
+            color: white;
+            border: 1px solid #444;
+            width: 100%;
+        }
+
+        .sidebar .btn-primary {
+            background-color: #1E90FF; /* Changed color */
+            border: none;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header h1 {
+            color: #1E90FF; /* Changed color */
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .chart {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: calc(50% - 10px); /* Adjusted to fit two charts in a row */
+            height: 300px; /* Reduced height */
+        }
+
+        .pie-charts {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .pie-chart {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: calc(50% - 10px); /* Adjusted to fit two charts in a row */
+            height: 300px; /* Reduced height */
+        }
+
+        .live-data {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            height: 300px; /* Reduced height */
+            margin-bottom: 20px;
+        }
+
+        .statistics {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .statistics h3 {
+            color: #1E90FF; /* Changed color */
+            margin: 10px 0;
+        }
+
+        .statistics p {
+            color: #1E90FF; /* Changed color */
+        }
+
+        .forecast-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .forecast {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            text-align: center;
+        }
+
+        .forecast h2 {
+            color: #1E90FF; /* Changed color */
+        }
+
+        .forecast img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .forecast ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .forecast ul li {
+            margin: 5px 0;
+        }
+
+        canvas {
+            height: 100% !important; /* Ensures the canvas elements take the full height of their container */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Dashboard</h2>
+            <h1>Future Crime Pattern Prediction</h1>
+            <!-- Form to input forecasting details -->
+            <form method="post">
+                <div class="form-group">
+                    <label for="future_steps">Enter number of months to forecast:</label>
+                    <input type="number" id="future_steps" name="future_steps" class="form-control" min="1" value="{{ future_steps }}">
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Enter start date for the forecast:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Forecast</button>
+            </form>
+            <!-- Forecasted Values Result -->
+            <div class="forecasted-values">
+                <h2>Forecasted Values</h2>
+                {% if forecast_results %}
+                    <ul>
+                        {% for value in forecast_results %}
+                            <li>{{ value }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>Analysis</h1>
+            </div>
+            <div class="content">
+                <div class="chart">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="crimeRateChart"></canvas>
+                </div>
+                <div class="forecast-container">
+                    <!-- Forecast result section -->
+                    <div class="forecast">
+                        <h2>Forecast Plot</h2>
+                        {% if forecast_plot %}
+                            <img src="data:image/png;base64,{{ forecast_plot }}" alt="Forecast Plot" class="img-fluid">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="chart">
+                    <canvas id="waterfallChart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div class="live-data">
+                    <canvas id="liveDataChart"></canvas>
+                </div>
+                <div class="statistics">
+                    <h3>Live Data</h3>
+                    <p>A Murder every min</p>
+                    <p>A Suicide every 40 sec</p>
+                    <p>7812 Sexual Assaults every day</p>
+                    <p>More than 100,000 pending rape cases in India. Close to 90 Rapes are reported every day in India.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cyber Crime', 'Violent Crime', 'Sexual Harassment', 'Rape', 'Kidnapping', 'Property', 'Fraud', 'Childhood Abuse', 'Robbery', 'Under Age Activities'],
+                    datasets: [{
+                        label: 'Crime Analysis 2003-2018',
+                        data: [2300, 1000, 1000, 624, 500, 431, 430, 355, 329.5, 246.5],
+                        backgroundColor: [
+                            '#00BFFF', '#7CFC00', '#FF69B4', '#FF4500', '#FFD700', '#ADFF2F', '#00FFFF', '#BA55D3', '#32CD32', '#FF6347'
+                        ],
+                        borderColor: [
+                            '#00BFFF', '#7CFC00', '#FF69B4', '#FF4500', '#FFD700', '#ADFF2F', '#00FFFF', '#BA55D3', '#32CD32', '#FF6347'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Crime Rate Pie Chart
+            const crimeRateCtx = document.getElementById('crimeRateChart').getContext('2d');
+            new Chart(crimeRateCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Bengaluru City ', 'Bengaluru District', 'Tumakuru', 'Shivamogga', 'Mandya', 'Bagalkot'],
+                    datasets: [{
+                        label: 'Crime Rate',
+                        data: [23.2, 20.5, 14.7, 17.8, 12.4, 11.4],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 99, 132, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Live Data Chart
+            const liveDataCtx = document.getElementById('liveDataChart').getContext('2d');
+            new Chart(liveDataCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00'],
+                    datasets: [{
+                        label: 'Live Data',
+                        data: [10, 20, 30, 25, 20, 15, 10, 15, 20, 25, 30, 35],
+                        backgroundColor: 'rgba(255, 71, 71, 0.2)',
+                        borderColor: 'rgba(255, 71, 71, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+        // Waterfall Chart
+            const crimessolved = document.getElementById('waterfallChart').getContext('2d');
+            new Chart(crimessolved, {
+                type: 'bar',
+                data: {
+                    labels: ['Bengalurucity', 'Mandya', 'Shivamogga', 'Bagalkot', 'Tumakuru', 'Mysuru'],
+                    datasets: [{
+                        label: 'Crimes Solved',
+                        data: [100, -20, 10, -10, 30, 110],
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            display: true,
+                            color: 'black',
+                            align: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Radar Chart
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Cyber Crime', 'Violent Crime', 'Sexual Harassment', 'Rape', 'Kidnapping', 'Property', 'Fraud'],
+                    datasets: [{
+                        label: 'Crime Rate Radar',
+                        data: [2300, 1000, 1000, 624, 500, 431, 430],
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+    </script>
+</body>
+</html>

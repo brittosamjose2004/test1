@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #2A2A2A;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2, .sidebar h1, .sidebar label {
+            color: #EFF204;
+        }
+
+        .sidebar form {
+            margin-top: 20px;
+        }
+
+        .sidebar .form-group {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .form-control {
+            background-color: #121212;
+            color: white;
+            border: 1px solid #444;
+            width: 100%;
+        }
+
+        .sidebar .btn-primary {
+            background-color: #FF4747;
+            border: none;
+            width: 100%;
+        }
+
+        .sidebar .btn-back {
+            background-color: #FF4747;
+            border: none;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .chart-container {
+            margin-top: 20px;
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .sidebar canvas {
+            width: 100% !important;
+            height: 300px; /* Set a fixed height for the chart */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header h1 {
+            color: #EFF204;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .chart {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: calc(50% - 10px); /* Adjusted to fit two charts in a row */
+            height: 300px; /* Reduced height */
+        }
+
+        .live-data {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            height: 300px; /* Reduced height */
+            margin-bottom: 20px;
+        }
+
+        .statistics {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .statistics h3 {
+            color: #EFF204;
+            margin: 10px 0;
+        }
+
+        .statistics p {
+            color: #FF4747;
+        }
+
+        .forecast {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .forecast h2 {
+            color: #EFF204;
+        }
+
+        .forecast img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .forecast ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .forecast ul li {
+            margin: 5px 0;
+        }
+
+        canvas {
+            height: 100% !important; /* Ensures the canvas elements take the full height of their container */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <button class="btn-back" onclick="goBack()">Back</button>
+            <h2>Dashboard</h2>
+            <h1>Predict Behavioral Status</h1>
+        <form action="/" method="post" class="form-group">
+            <div class="form-group">
+                <label for="age">Enter age:</label>
+                <input type="number" id="age" name="age" min="0" required class="form-control"><br>
+            </div>
+
+            <div class="form-group">
+                <label>Select sex:</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="female" name="sex" value="FEMALE" checked class="form-check-input">
+                        <label for="female" class="form-check-label">Female</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="male" name="sex" value="MALE" class="form-check-input">
+                        <label for="male" class="form-check-label">Male</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Select present city:</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="bengaluru" name="present_city" value="Bengaluru City" checked class="form-check-input">
+                        <label for="bengaluru" class="form-check-label">Bengaluru City</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="other_city" name="present_city" value="Other" class="form-check-input">
+                        <label for="other_city" class="form-check-label">Other</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Select present state:</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="karnataka" name="present_state" value="Karnataka" checked class="form-check-input">
+                        <label for="karnataka" class="form-check-label">Karnataka</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="other_state" name="present_state" value="Other" class="form-check-input">
+                        <label for="other_state" class="form-check-label">Other</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Predict Behavioral Status</button>
+        </form>
+
+            <!-- New chart added below the form -->
+            <div class="chart-container">
+                <canvas id="newChart"></canvas>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>Analysis</h1>
+            </div>
+            <div class="content">
+               <div class="chart">
+                    <!-- Inserted iframe in place of the original chart -->
+                    <iframe src="C:\Users\bsj\Downloads\model\chart\Recent_crimes.html" style="width:100%; height:100%; border:none;"></iframe>
+                </div>
+                <div class="chart">
+                    <!-- Inserted iframe in place of the original chart -->
+                    <iframe src="C:\Users\bsj\Downloads\model\chart\Distribution_of_Accused_Ages.html" style="width:100%; height:100%; border:none;"></iframe>
+                </div>
+                
+                <div class="forecast">
+                    <!-- Prediction Result -->
+        {% if predicted_status %}
+        <div class="alert alert-success mt-4">
+            <h2>Prediction Result</h2>
+            <p>The predicted Behavioral Status is: <strong>{{ predicted_status }}</strong></p>
+        </div>
+        {% endif %}
+    </div> 
+                
+                <div class="chart">
+                    <canvas id="waterfallChart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                
+               
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script>
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            
+
+            // Waterfall Chart
+            const waterfallCtx = document.getElementById('waterfallChart').getContext('2d');
+            new Chart(waterfallCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Start', '1', '0', '0', '1', 'End'],
+                    datasets: [{
+                        label: 'Age Chart',
+                        data: [100, -20, 10, -10, 30, 110],
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            display: true,
+                            color: 'black',
+                            align: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Radar Chart
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Male', 'Female', 'Both', '', '', '', ''],
+                    datasets: [{
+                        label: 'Age Rate Radar',
+                        data: [2300, 1000, 1000, 624, 500, 431, 430],
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // New Chart
+            const newChartCtx = document.getElementById('newChart').getContext('2d');
+            new Chart(newChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Male', 'Female', 'Adult', 'Childern'],
+                    datasets: [{
+                        label: 'AGE',
+                        data: [300, 50, 100, 200],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        });
+    </script>
+</body>
+</html>
